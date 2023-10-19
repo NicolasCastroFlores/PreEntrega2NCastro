@@ -1,0 +1,39 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+.saludo {
+    margin-bottom: 20px;
+}
+
+.saludo button {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+.contenedor {
+    display: flex;
+    justify-content: space-around;
+}
+
+.totalpagar,
+.paquetes,
+.entradas,
+.carrito {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 23%;
+    margin: 0 2%;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+button {
+    font-size: 16px;
+    padding: 10px 20px;
+}
