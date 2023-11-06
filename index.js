@@ -1,11 +1,17 @@
-let carrito = [];
 
-function solicitarDatos() {
-    const nombreUsuario = prompt("Por favor, ingresa tu nombre:");
-    if (nombreUsuario) {
-        alert(`¡Hola ${nombreUsuario}! Bienvenido a Cinema233`);
-    }
-}
+
+document.getElementById('verificarButton').addEventListener('click', function () {
+    const nombreUsuario = document.getElementById('nombreUsuarioInput').value || '';
+
+    const mensaje = nombreUsuario ? `¡Hola ${nombreUsuario}! Bienvenido a Cinema233` : 'El campo de nombre de usuario está vacío.';
+    console.log(mensaje);
+
+    const nombreUsuarioJSON = JSON.stringify(nombreUsuario); // Convierte a JSON
+    localStorage.setItem('usuario', nombreUsuarioJSON); // Guarda en el localStorage
+});
+
+
+/////////HASTA ACA OK
 
 const entradas = [{
     precio: 4500,
@@ -32,7 +38,6 @@ const entradas = [{
     nombre: "2x1",
     disponible: true
 },]
-
 
 const paquetes = [{
 
@@ -71,84 +76,31 @@ const paquetes = [{
     disponible: true
 },]
 
+const contenedorPaquetes = document.getElementById("paquetes");
 const contenedorEntradas = document.getElementById("entradas");
 
-function agregarEntradaAlCarrito(nombreEntrada) {
-    let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
+function agregarElementoAlCarrito(elemento, tipo) {
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
-    if (entrada) {
-        carrito.push(entrada);
-        console.log(`${nombreEntrada} se agregó de forma exitosa.`);
-    } else {
-        console.log(`${nombreEntrada} no existe o no está disponible por ahora.`);
-    }
-}
-
-entradas.forEach(entrada => {
-    const entradaElement = document.createElement("div");
-    entradaElement.textContent = `Nombre: ${entrada.nombre}, Precio: $${entrada.precio}`;
-
-    const botonAgregar = document.createElement("button");
-    botonAgregar.textContent = "Agregar al carrito";
-    botonAgregar.addEventListener("click", () => {
-        agregarEntradaAlCarrito(entrada.nombre);
+    carrito.push({
+        elemento,
+        tipo
     });
-
-
-    entradaElement.appendChild(botonAgregar);
-
-    contenedorEntradas.appendChild(entradaElement);
-});
-
-function agregarEntradaAlCarrito(nombreEntrada) {
-    let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
-
-    if (entrada) {
-        carrito.push(entrada);
-        actualizarCarritoDOM();
-        console.log(`${nombreEntrada} se agregó de forma exitosa.`);
-    } else {
-        console.log(`${nombreEntrada} no existe o no esta disponible por ahora.`);
-    }
+    localStorage.setItem('carrito', JSON.stringify(carrito)); // Guarda el carrito en localStorage
+    carritoActualizado(); // Función para actualizar la visualización del carrito
 }
 
 function carritoActualizado() {
-
-    let carritoContainer = document.getElementById('carrito-container');
-
-
-    carritoContainer.innerHTML = '';
-
-    carrito.forEach(producto => {
-        let li = document.createElement('li');
-        li.textContent = `${producto.nombre} - Precio: $${producto.precio}`;
-        carritoContainer.appendChild(li);
-    });
-}
-
-function agregarEntradaAlCarrito(nombreEntrada) {
-    let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
-
-    if (entrada) {
-        carrito.push(entrada);
-        const carritoElement = document.getElementById('carrito');
-        carritoElement.innerHTML += `<div class="producto">${nombreEntrada}</div>`;
-        console.log(`${nombreEntrada} se agregó de forma exitosa.`);
-    } else {
-        console.log(`${nombreEntrada} no existe o no está disponible por ahora.`);
-    }
-}
-
-function carritoActualizado() {
+    const carritoGuardado = JSON.parse(localStorage.getItem('carrito')) || [];
     const carritoElement = document.getElementById('carrito');
     carritoElement.innerHTML = '<h2>Carrito</h2>';
 
-    carrito.forEach(producto => {
+    carritoGuardado.forEach(producto => {
         const productoElement = document.createElement('div');
         productoElement.classList.add('producto');
         productoElement.innerHTML = `
-            ${producto.nombre}
-            <button onclick="eliminarDelCarrito('${producto.nombre}')">Eliminar</button>
+            ${producto.elemento.nombre} - Tipo: ${producto.tipo}
+            <button onclick="eliminarDelCarrito('${producto.elemento.nombre}')">Eliminar</button>
         `;
         carritoElement.appendChild(productoElement);
     });
@@ -156,57 +108,24 @@ function carritoActualizado() {
     mostrarTotalAPagar();
 }
 
-function agregarEntradaAlCarrito(nombreEntrada) {
-    let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
-
-    if (entrada) {
-        carrito.push(entrada);
-        console.log(`${nombreEntrada} se agregó de forma exitosa.`);
-        carritoActualizado();
-    } else {
-        console.log(`${nombreEntrada} no existe o no está disponible por ahora.`);
-
-    }
-}
-
 function eliminarDelCarrito(nombreProducto) {
-    carrito = carrito.filter(producto => producto.nombre !== nombreProducto);
-    console.log(`${nombreProducto} se eliminó correctamente.`);
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+    carrito = carrito.filter(producto => producto.elemento.nombre !== nombreProducto);
+    localStorage.setItem('carrito', JSON.stringify(carrito));
     carritoActualizado();
-    eliminarDelCarritoAgregado(nombreProducto);
 }
 
-function eliminarDelCarritoAgregado(nombreProducto) {
-    let carritoElement = document.getElementById('carrito');
-    let productos = carritoElement.getElementsByClassName('producto');
+function mostrarTotalAPagar() {
+    let resultado = 0;
+    let carritoGuardado = JSON.parse(localStorage.getItem('carrito')) || [];
 
-    for (let i = 0; i < productos.length; i++) {
-        let producto = productos[i];
-        if (producto.textContent.includes(nombreProducto)) {
-            carritoElement.removeChild(producto);
-        }
-    }
-}
-function eliminarDelCarrito(nombreProducto) {
-    carrito = carrito.filter(producto => producto.nombre !== nombreProducto);
-    console.log(`${nombreProducto} se eliminó correctamente.`);
-    carritoActualizado();
-    eliminarDelCarritoAgregado();
-}
+    carritoGuardado.forEach(producto => {
+        resultado += producto.elemento.precio;
+    });
 
-
-const contenedorPaquetes = document.getElementById("paquetes");
-
-function agregarPaqueteAlCarrito(nombrePaquete) {
-    let paquete = paquetes.find(paquete => paquete.nombre === nombrePaquete);
-
-    if (paquete) {
-        carrito.push(paquete);
-        console.log(`${nombrePaquete} se agregó de forma exitosa.`);
-        carritoActualizado();
-    } else {
-        console.log(` ${nombrePaquete} no existe o no esta disponible por ahora.`);
-    }
+    let totalPagarElement = document.getElementById('totalpagar');
+    totalPagarElement.innerHTML = `<p>El valor a abonar es de $${resultado}. ¡Disfrute su película!</p>`;
 }
 
 paquetes.forEach(paquete => {
@@ -216,20 +135,191 @@ paquetes.forEach(paquete => {
     const botonAgregar = document.createElement("button");
     botonAgregar.textContent = "Agregar al carrito";
     botonAgregar.addEventListener("click", () => {
-        agregarPaqueteAlCarrito(paquete.nombre);
+        agregarElementoAlCarrito(paquete, 'paquete');
     });
 
     paqueteElement.appendChild(botonAgregar);
-
     contenedorPaquetes.appendChild(paqueteElement);
 });
 
+entradas.forEach(entrada => {
+    const entradaElement = document.createElement("div");
+    entradaElement.textContent = `Nombre: ${entrada.nombre}, Precio: $${entrada.precio}`;
+
+    const botonAgregar = document.createElement("button");
+    botonAgregar.textContent = "Agregar al carrito";
+    botonAgregar.addEventListener("click", () => {
+        agregarElementoAlCarrito(entrada, 'entrada');
+    });
+
+    entradaElement.appendChild(botonAgregar);
+    contenedorEntradas.appendChild(entradaElement);
+});
+
+carritoActualizado();
 
 
-function mostrarTotalAPagar() {
-    let resultado = carrito.reduce((accum, p) => accum + p.precio, 0);
-    let totalPagarElement = document.getElementById('totalpagar');
-    totalPagarElement.innerHTML = `<p>El valor a abonar es de $${resultado}. ¡Disfrute su película!</p>`;
-}
+///////////////////////////////////////////////////////////CODIGOVIEJO
 
-mostrarTotalAPagar();
+// const contenedorEntradas = document.getElementById("entradas");
+
+// function agregarEntradaAlCarrito(nombreEntrada) {
+//     let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
+
+//     if (entrada) {
+//         carrito.push(entrada);
+//         console.log(`${nombreEntrada} se agregó de forma exitosa.`);
+//     } else {
+//         console.log(`${nombreEntrada} no existe o no está disponible por ahora.`);
+//     }
+// }
+
+// entradas.forEach(entrada => {
+//     const entradaElement = document.createElement("div");
+//     entradaElement.textContent = `Nombre: ${entrada.nombre}, Precio: $${entrada.precio}`;
+
+//     const botonAgregar = document.createElement("button");
+//     botonAgregar.textContent = "Agregar al carrito";
+//     botonAgregar.addEventListener("click", () => {
+//         agregarEntradaAlCarrito(entrada.nombre);
+//     });
+
+
+//     entradaElement.appendChild(botonAgregar);
+
+//     contenedorEntradas.appendChild(entradaElement);
+// });
+
+// function agregarEntradaAlCarrito(nombreEntrada) {
+//     let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
+
+//     if (entrada) {
+//         carrito.push(entrada);
+//         actualizarCarritoDOM();
+//         console.log(`${nombreEntrada} se agregó de forma exitosa.`);
+//     } else {
+//         console.log(`${nombreEntrada} no existe o no esta disponible por ahora.`);
+//     }
+// }
+
+// function carritoActualizado() {
+
+//     let carritoContainer = document.getElementById('carrito-container');
+
+
+//     carritoContainer.innerHTML = '';
+
+//     carrito.forEach(producto => {
+//         let li = document.createElement('li');
+//         li.textContent = `${producto.nombre} - Precio: $${producto.precio}`;
+//         carritoContainer.appendChild(li);
+//     });
+// }
+
+// function agregarEntradaAlCarrito(nombreEntrada) {
+//     let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
+
+//     if (entrada) {
+//         carrito.push(entrada);
+//         const carritoElement = document.getElementById('carrito');
+//         carritoElement.innerHTML += `<div class="producto">${nombreEntrada}</div>`;
+//         console.log(`${nombreEntrada} se agregó de forma exitosa.`);
+//     } else {
+//         console.log(`${nombreEntrada} no existe o no está disponible por ahora.`);
+//     }
+// }
+
+// function carritoActualizado() {
+//     const carritoElement = document.getElementById('carrito');
+//     carritoElement.innerHTML = '<h2>Carrito</h2>';
+
+//     carrito.forEach(producto => {
+//         const productoElement = document.createElement('div');
+//         productoElement.classList.add('producto');
+//         productoElement.innerHTML = `
+//             ${producto.nombre}
+//             <button onclick="eliminarDelCarrito('${producto.nombre}')">Eliminar</button>
+//         `;
+//         carritoElement.appendChild(productoElement);
+//     });
+
+//     mostrarTotalAPagar();
+// }
+
+// function agregarEntradaAlCarrito(nombreEntrada) {
+//     let entrada = entradas.find(entrada => entrada.nombre === nombreEntrada);
+
+//     if (entrada) {
+//         carrito.push(entrada);
+//         console.log(`${nombreEntrada} se agregó de forma exitosa.`);
+//         carritoActualizado();
+//     } else {
+//         console.log(`${nombreEntrada} no existe o no está disponible por ahora.`);
+
+//     }
+// }
+
+// function eliminarDelCarrito(nombreProducto) {
+//     carrito = carrito.filter(producto => producto.nombre !== nombreProducto);
+//     console.log(`${nombreProducto} se eliminó correctamente.`);
+//     carritoActualizado();
+//     eliminarDelCarritoAgregado(nombreProducto);
+// }
+
+// function eliminarDelCarritoAgregado(nombreProducto) {
+//     let carritoElement = document.getElementById('carrito');
+//     let productos = carritoElement.getElementsByClassName('producto');
+
+//     for (let i = 0; i < productos.length; i++) {
+//         let producto = productos[i];
+//         if (producto.textContent.includes(nombreProducto)) {
+//             carritoElement.removeChild(producto);
+//         }
+//     }
+// }
+// function eliminarDelCarrito(nombreProducto) {
+//     carrito = carrito.filter(producto => producto.nombre !== nombreProducto);
+//     console.log(`${nombreProducto} se eliminó correctamente.`);
+//     carritoActualizado();
+//     eliminarDelCarritoAgregado();
+// }
+
+
+// const contenedorPaquetes = document.getElementById("paquetes");
+
+// function agregarPaqueteAlCarrito(nombrePaquete) {
+//     let paquete = paquetes.find(paquete => paquete.nombre === nombrePaquete);
+
+//     if (paquete) {
+//         carrito.push(paquete);
+//         console.log(`${nombrePaquete} se agregó de forma exitosa.`);
+//         carritoActualizado();
+//     } else {
+//         console.log(` ${nombrePaquete} no existe o no esta disponible por ahora.`);
+//     }
+// }
+
+// paquetes.forEach(paquete => {
+//     const paqueteElement = document.createElement("div");
+//     paqueteElement.textContent = `Nombre: ${paquete.nombre}, Precio: $${paquete.precio}`;
+
+//     const botonAgregar = document.createElement("button");
+//     botonAgregar.textContent = "Agregar al carrito";
+//     botonAgregar.addEventListener("click", () => {
+//         agregarPaqueteAlCarrito(paquete.nombre);
+//     });
+
+//     paqueteElement.appendChild(botonAgregar);
+
+//     contenedorPaquetes.appendChild(paqueteElement);
+// });
+
+
+
+// function mostrarTotalAPagar() {
+//     let resultado = carrito.reduce((accum, p) => accum + p.precio, 0);
+//     let totalPagarElement = document.getElementById('totalpagar');
+//     totalPagarElement.innerHTML = `<p>El valor a abonar es de $${resultado}. ¡Disfrute su película!</p>`;
+// }
+
+// mostrarTotalAPa
