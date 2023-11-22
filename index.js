@@ -142,7 +142,6 @@ entradas.forEach(entrada => {
 
 ////////////////// 
 
-
 carritoActualizado();
 const apiKey = "dfefc6d7";
 const lista = document.querySelector("#listado");
@@ -156,7 +155,6 @@ function CarritoParaPeliculas() {
     this.agregarAlCarrito = function (pelicula) {
         pelicula.precio = parseFloat((Math.random() * 10).toFixed(2));
         this.carritoPeliculas.push(pelicula);
-        this.actualizarTotalPrecio();
         this.guardarEnLocalStorage();
         console.log(`¡"${pelicula.Title}" ha sido agregada al carrito!`);
         this.renderizarEnDiv('carritoPeliculas');
@@ -164,19 +162,11 @@ function CarritoParaPeliculas() {
 
     this.quitarDelCarrito = function (index) {
         const peliculaEliminada = this.carritoPeliculas.splice(index, 1)[0];
-        this.actualizarTotalPrecio();
         this.guardarEnLocalStorage();
         console.log(`Película "${peliculaEliminada.Title}" ha sido quitada del carrito.`);
         this.renderizarEnDiv('carritoPeliculas');
     };
 
-    this.actualizarTotalPrecio = function () {
-        let total = 0;
-        this.carritoPeliculas.forEach(pelicula => {
-            total += pelicula.precio || 0;
-        });
-        totalPrecioPelicula.textContent = `Total: $${total.toFixed(2)}`;
-    };
 
     this.guardarEnLocalStorage = function () {
         localStorage.setItem('carritoPeliculas', JSON.stringify(this.carritoPeliculas));
